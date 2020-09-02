@@ -1,0 +1,145 @@
+<html>
+<head>
+    <script src="js/popper.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel=stylesheet type="text/css" href="css/mycss.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <meta charset="UTF-8">
+</head>
+<body>
+<div align = "center" id = "thankYouText"> Thanks to my friend and teacher, Firecat. </div>
+<div id="canvas_block">
+    <table border=5 align="center">
+        <tr>
+            <td>
+                <div align="left" class="UnRe">
+                    <button type="button" class="btn btn-dark " value="Undo" onClick="re_un_do('un')" title="Undo"><img
+                            src="./img/canvas/undo.png" width="120%"></button>
+                </div>
+                <div align="right" class="UnRe">
+                    <button type="button" class="btn btn-dark " value="Redo" onClick="re_un_do('re')" title="Redo"><img
+                            src="./img/canvas/redo.png" width="120%"></button>
+                </div>
+            </td>
+
+            <td>
+                <a href="#" id="save" class="btn btn-dark function" value="Save" download="draw.png" title="Save">  <!--href先設一個空間(#)，讓他有地方可以存檔-->
+                    <img src="./img/canvas/save.png" width="80%"></a>
+            </td>
+
+            <!--畫筆顏色-->
+            <td>
+                <div class="btn-group function">
+                    <button type="button" class="btn btn-dark dropdown-toggle function" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        <!--data-toggle是bootstrap中其中一個函式，dropdow-->
+                        <p id="color">Color</p>
+                    </button>
+                    <div class="dropdown-menu color" style="text-align:center">
+                        <p>Red 紅<input class="dropdown-item" id="colorR" type="range" name="points" min="1" max="255"
+                                       value="1"></p>
+                        <p>Greed 綠<input class="dropdown-item" id="colorG" type="range" name="points" min="1" max="255"
+                                         value="255"></p>
+                        <p>Blue 藍<input class="dropdown-item" id="colorB" type="range" name="points" min="1" max="255"
+                                        value="255"></p>
+                        <p>不透明度<input class="dropdown-item" id="colorA" type="range" name="points" min="0" max="100"
+                                      value="100"></p>
+                    </div>
+                </div>
+            </td>
+
+            <!--線條顏色與線條種類-->
+            <td>
+                <div class="btn-group function">
+                    <button type="button" class="btn btn-dark dropdown-toggle function" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        <p style="font-size:17px ! important;">Size &<br>Type</p>
+                    </button>
+                    <div class="dropdown-menu size" style="text-align:center">
+                        <p id="size">5</p>
+                        <input class="dropdown-item" id="size_bar" type="range" name="points" min="1" max="100"
+                               value="5">
+                        <div class="dropdown-divider"></div> <!--在bootstrap裡的功能-->
+                        <p id="type">Type 線段種類</p>
+                        <button class="btn btn-light type" onClick="setType('butt');">
+                            <img src="./img/canvas/butt.png" width=40> butt
+                        </button>
+                        <br>
+                        <button class="btn btn-light type" onClick="setType('round');">
+                            <img src="./img/canvas/round.png" width=40>round
+                        </button>
+                        <br>
+                        <button class="btn btn-light type" onClick="setType('square');">
+                            <img src="./img/canvas/square.png" width=40>square
+                        </button>
+                    </div>
+                </div>
+            </td>
+
+            <td>
+                <button type="button" class="btn btn-dark function" value="Pen" onClick="setmode(1);" title="Pen"><img
+                        src="./img/canvas/pen.png" width="70%"></button>
+            </td>
+
+            <td>
+                <button type="button" class="btn btn-dark function" value="Erase" onClick="setmode(0);" title="Erase">
+                    <img src="./img/canvas/erase.png" width="70%"></button>
+            </td>
+
+            <td>
+                <div class="btn-group quick_function">
+                    <input type="button" class="btn btn-dark function" value="Line" onClick="setmode(4);" title="Line">
+                    <button type="button" class="btn btn-dark dropdown-toggle dropdown-toggle-split"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu lenth">
+                        <p id="len">線段空隙 : 0</p>
+                        <input class="dropdown-item" id="len_bar" type="range" min="0" max="100" value="0">
+                        <p id="len2">線段長度 : 10</p>
+                        <input class="dropdown-item" id="len_bar2" type="range" min="1" max="100" value="10">
+                    </div>
+                </div>
+            </td>
+
+            <td>
+                <div class="btn-group quick_function">
+                    <input type="button" class="btn btn-dark" value="Shape" onClick="setmode(6);" title="Shape">
+                    <button type="button" class="btn btn-dark dropdown-toggle dropdown-toggle-split"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <button class="btn btn-light quick_function_item" onClick="setmode(2);">
+                            <img src="./img/canvas/shape_square.png" width=40>矩形
+                        </button>
+                        <br>
+                        <button class="btn btn-light quick_function_item" onClick="setmode(3);">
+                            <img src="./img/canvas/circle.png" width=40>圓形
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <form class="custom-control custom-checkbox" name="form">
+                            <input type="checkbox" class="custom-control-input " id="defaultUnchecked" name="fill">
+                            <label class="custom-control-label" for="defaultUnchecked">是否填滿</label>
+                        </form>
+                    </div>
+                    <!-- <input type="button" class="btn btn-dark function" value="Shape" onClick="setmode(3);" title ="Shape">  -->
+                </div>
+            </td>
+
+            <td>
+                <button type="button" class="btn btn-dark function" value="Clear" onClick="clear_draw();" title="Clear">
+                    <img src="./img/canvas/new.png" width="60%"></button>
+            </td>
+
+        </tr>
+    </table>
+
+    <div id="painter" class="pen">
+        <canvas width="750" height="525" id="myCanvas"></canvas>
+    </div>
+</div>
+</body>
+<script src="./js/draw.js"></script>
+</html>
