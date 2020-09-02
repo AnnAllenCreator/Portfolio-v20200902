@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!-- 禁用橫向滾動 -->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=0" />-->
+    <meta charset="utf-8"/>
+    <title>Let's play Card Memory Game!</title>
+    <link rel=stylesheet type="text/css" href="MemoryGameStyle.css">
+</head>
+
+<body onresize="onresize()"> <!--與下面的function onresize() 互動，讓圖片、圖片空間重新設置-->
+
+<div class="background">
+    <div class="turning2" id="Done"> <!--成功/失敗時，場景翻轉-->
+        You've Done.
+    </div>
+    <div class="scene turning1" id="scene"></div> <!--場景原樣-->
+    <div id="Start" class="button">Restart</div>
+</div>
+
+<div class="countDownBar">
+    <div id="pause" class="pause">||</div> <!--暫停鍵-->
+    <div id="counter"> <!--倒數計時器-->
+        <div id="countDown"></div>
+    </div>
+</div>
+
+<!--&lt;!&ndash;音效&ndash;&gt;-->
+<!--<audio id="dingmusic">-->
+<!--<source src="MemoryGameSound/ding.mp3" type="audio/mp3" />-->
+<!--</audio>-->
+
+<script type="text/javascript">
+    let counterWidth = 100;  //計時條長度
+    let timer = 50000;        //倒數時間(亳秒)
+    let counterHandle      //計時條
+    var $ = function (obj) {
+        return document.getElementById(obj);
+    } //$(element) = obj -->將obj塞回element裡
+    /*圖片陣列*/
+    var model = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];   //圖片總共有8種、16張
+    /*隨機排列*/
+    function fn() {return Math.random() - Math.random();} //產生一亂數
+    model.sort(fn); //sort的括號中裝排列的規則(fn = 1亂數)
+
+    var html = "";
+
+    //插入html圖片描述
+    for (var i = 0, len = model.length; i < len; i++) {
+        var url = "MemoryGameImg/" + model[i] + ".png"; //圖片位置
+        /*將卡片插入html裡*/
+        html += ' <div class="card" attr=' + model[i] + ' id="box' + i + '"><span class="bg" id="bg' + i + '"></span><img class="img" id="img' + i + '" src=' + url + ' /></div> ';
+    }
+
+    $("scene").innerHTML = html; // 插入圖片數據到html [innerHTML將會把html現有scene的字串輸回html裡]
+    //+= 還是 = ???
+
+    //調整圖片比例
+    function onresize() {
+        var picbox = document.getElementById("box1");    //先預設picbox是box1，在之後(下4行的for)會換 [picbox = box1的數值]
+        var imgs, bgs;
+        var picbox_w = picbox.offsetWidth;  //抓取picbox的寬度
+        var picbox_h = picbox_w * 8 / 7;  //修改图片比例，我的圖片比例是70*80
+        for (var i = 0; i < 16; i++) {
+            picbox = document.getElementById("box" + i);
+            picbox.style.height = picbox_h + 'px';
+            imgs = document.getElementById("img" + i);
+            imgs.style.width = picbox_w + 'px';
+            imgs.style.height = picbox_h + 'px';
+            bgs = document.getElementById("bg" + i);
+            bgs.style.width = picbox_w + 'px';
+            bgs.style.height = picbox_h + 'px';
+        }
+    }
+
+    onresize();
+
+    var cacheObj = null; //緩存翻牌資料
+
+    var aBtn = $("scene").getElementsByTagName("div");  //將aBtn塞進Scene下面的div
+
+    var count = 0;//已配對數量
+
+    var count_sum = 0;//已點擊次數
+
+    // var ding = document.getElementById("dingmusic");  //音效
+
+    for (var i = 0, len = aBtn.length; i < len; i++) {
+        counterHandle = setInterval(timeCounter, 125)    //啟動計時器
+        /*滑鼠點擊時的動作*/
+        aBtn[i].onclick = function () {
+            var self = this;    //onclick的物件
+            // ding.play();    //播放音效
+            count_sum++;    //計步器++
+            $("Start").textContent = "Click to Restart 已經點擊 " + count_sum + " 步"; //點擊後，「等於符號右方」會取代掉「等於符號左方」
+            if (cacheObj == self) { //如果onclick的物件==暫存的物件
+                return;
+            }
+            self.className = "card hover";
+            if (cacheObj == null) { // 判斷緩存是否存在
+                cacheObj = self;    //緩存如果沒東西，就把onclick的東西塞進緩存
+            }
+            else {
+                if (cacheObj.getAttribute("attr") == self.getAttribute("attr"))  // 緩存裡面有東西，則判斷緩存的物件和第二張牌相等
+                {
+                    self.className = cacheObj.className = "card hover"; //onclick的東西、緩存的東西的樣式都改成card hover
+                    self.onclick = cacheObj.onclick = null;
+                    cacheObj = null;    //緩存的東西變空物件
+                    count++;
+                } else {  //判斷不相等
+                    setTimeout(function () {
+                        self.className = "card";    //則將onclick樣式變回card
+                        if (cacheObj) {     //如果緩存有東西，緩存裡的東西的樣式也變成card
+                            cacheObj.className = "card";
+                        }
+                        cacheObj = null;    //把緩存清空
+                    }, 300);    //  在300毫秒後
+
+                }
+            }
+            if (count == 8) {   //如果翻出八組
+                setTimeout(function () {    //則在300毫秒後將整個屏幕動畫消失，完成的屏幕動畫出現
+                    $("scene").className = "scene turning2";
+                    $("Done").className = "turning1";
+                    document.getElementById('countDown').style.width = "0%";
+                    timer = 0;
+                }, 300)
+            }
+        }
+
+    }
+    $("Start").onclick = function () {  //如果按下開始，重新載入
+        location.reload();  //location.reload是刷新目前頁面，重新整理的意思
+        counterWidth = 100;   //時間條有100%
+        timer = 50000;    //時間總共50000
+        document.getElementById('countDown').style.width = "100%";
+        clearInterval(counterHandle);
+    }
+
+    $("pause").onclick = function () {  //如果按下暫停圖示就會變更
+        if (document.getElementById('pause').textContent == "||") {
+            $("pause").textContent = "▶";
+        } else {
+            $("pause").textContent = "||";
+        }
+    }
+
+    function timeCounter() {
+        if (timer < 0) {
+            document.getElementById('countDown').style.width = "0%";
+            clearInterval(counterHandle);
+            result();  //計時結束時執行結果判定函式
+        } else {
+            if (document.getElementById('pause').textContent == "||") {
+                timer -= 10;  //時間每次減10
+                counterWidth -= 0.02; //時間條每次減2%
+                document.getElementById('countDown').style.width = counterWidth + "%";
+            } else if (document.getElementById('pause').textContent == "▶") {
+            }
+        }
+    }
+
+    function result() {
+        let com = count;
+        //設定結果字串
+        if (com >= 8) {
+            $("Done").textContent = "You've Done.";
+            setTimeout(function () {    //則在300毫秒後將整個屏幕動畫消失，完成的屏幕動畫出現
+                $("scene").className = "scene turning2";    //將整個屏幕動畫消失，成功的文字動畫出現
+                $("Done").className = "turning1";
+            }, 300)
+        } else {
+            $("Done").textContent = "失敗了，還有" + (8 - com) + "組未完成";
+            setTimeout(function () {    //則在300毫秒後將整個屏幕動畫消失，完成的屏幕動畫出現
+                $("scene").className = "scene turning2";    //將整個屏幕動畫消失，失敗的文字動畫出現
+                $("Done").className = "turning1";
+            }, 300)
+        }
+    }
+</script>
+
+</body>
+
+</html>
